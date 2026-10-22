@@ -9,9 +9,9 @@
 | 原始项目真实来源/版本 | 已核实 GitHub 上游和固定提交 |
 | 构建器对模拟上游源码测试 | 已通过 |
 | 阶段 0 APK 探测器合成文件单元测试 | 已通过 |
-| GitHub Actions 克隆上游/构建并上传游戏工程 | 由 `.github/workflows/offline-game.yml` 验证 |
+| GitHub Actions 克隆上游/构建并上传游戏工程 | 已通过 Linux 与 Windows 自动化，且有完整工程附件 |
 | Godot 引擎内完整 GUI / 战斗 / 重新进入存档 | **尚未在此环境实际运行** |
-| Windows .exe / Android APK | **尚未导出** |
+| Windows 便携运行包 | **已完成**：官方 Godot 引擎程序 + 项目 + `PLAY.cmd`；不等于已导出专用游戏 EXE。Android APK **未导出** |
 | 未知停服游戏客户端离线化 | **不可评估：缺游戏名称和真实 APK** |
 
 **风险：** 上游示例 `project.godot` 标记 Godot 4.7 开发特性版本，可能需要 Godot 4.7 对应编辑器；使用旧稳定版不保证兼容。原开源示例只有示范内容，未扩建为长剧情商业游戏。
