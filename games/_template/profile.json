@@ -1,0 +1,11 @@
+{
+  "id": "replace-with-slug",
+  "name": "游戏名称",
+  "status": "unknown",
+  "sample_versions": [],
+  "engine": null,
+  "container_formats": [],
+  "research_topics": [],
+  "sources": [],
+  "notes": "notes.md"
+}

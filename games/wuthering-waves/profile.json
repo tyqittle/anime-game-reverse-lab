@@ -1,0 +1,15 @@
+{
+  "id": "wuthering-waves",
+  "name": "鸣潮",
+  "status": "unknown",
+  "sample_versions": [],
+  "engine": null,
+  "container_formats": [],
+  "research_topics": [
+    "本地资源容器",
+    "纹理与音频索引",
+    "动画资源依赖"
+  ],
+  "sources": [],
+  "notes": "notes.md"
+}

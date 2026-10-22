@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0e19" />
+  <title>星烬计划 | 离线动作复刻技术演示</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">✧</span><span><strong>PROJECT EMBER</strong><small>星烬计划 / 开放研究原型</small></span></div>
+      <div class="top-actions">
+        <label for="skinFile" class="pill upload" title="导入自己有使用权的透明 PNG 作为角色显示图">导入角色 PNG <input id="skinFile" type="file" accept="image/png,image/webp" hidden /></label>
+        <button type="button" class="pill" id="soundButton" aria-pressed="false">音效：关闭</button>
+        <a class="pill github" href="https://github.com/tyqittle/anime-game-reverse-lab" target="_blank" rel="noopener">源码 ↗</a>
+      </div>
+    </header>
+    <section class="viewport" aria-label="原创离线游戏演示">
+      <canvas id="gameCanvas" width="1280" height="720" tabindex="0" aria-label="横版动作游戏，键盘 A D 移动，空格跳跃，J 斩击，K 冲刺，L 远程攻击"></canvas>
+      <div class="vignette"></div>
+      <div class="hud" id="hud">
+        <div class="hp-block"><div class="hud-label">SIGNAL / 生命 <span id="hpText">100 / 100</span></div><div class="hp-track"><div id="hpBar" class="hp-fill"></div></div><div class="small-text">RECONSTRUCTED SYSTEM · V0.2</div></div>
+        <div class="hud-center"><div class="chapter">CHAPTER 01 <span>//</span> 暮色回廊</div><div class="hud-score"><span id="score">000000</span> <span class="sep">·</span> <span id="combo">0 HIT</span></div></div>
+        <div class="mission">目标 <strong id="objective">抵达终端并清除守卫</strong><div class="small-text" id="distance">距离终端 4200m</div></div>
+      </div>
+      <div class="prompt" id="gamePrompt"><span class="eyebrow">ORIGINAL OPEN ENGINE PROTOTYPE / 2026</span><h1>星烬计划 <em>EMBER</em></h1><p>基于公开游戏开发技术重新实现的独立动作玩法示例。<br>拥有可修改的角色控制、战斗逻辑、关卡数据与资源接口。</p><div class="keys"><span><kbd>A</kbd><kbd>D</kbd> 移动</span><span><kbd>SPACE</kbd> 二段跳</span><span><kbd>J</kbd> 近战</span><span><kbd>K</kbd> 闪避</span><span><kbd>L</kbd> 飞刃</span></div><button type="button" id="startButton" class="primary">启动离线演示 <span>→</span></button><div class="hint">P 暂停 · R 重开 · 无需登录或联网</div></div>
+      <div class="toast" id="toast" aria-live="polite"></div>
+      <div class="boss-hud" id="bossHud" hidden><span>THE WARDEN / 终端守卫</span><div class="boss-track"><div id="bossBar"></div></div></div>
+      <div class="mobile-control left"><button type="button" data-control="left" aria-label="向左移动">◀</button><button type="button" data-control="right" aria-label="向右移动">▶</button></div>
+      <div class="mobile-control right"><button type="button" data-control="jump">跳</button><button type="button" data-control="attack">斩</button><button type="button" data-control="dash">闪</button><button type="button" data-control="shoot">刃</button></div>
+    </section>
+    <footer class="foot"><span><i class="live"></i> LOCAL SIMULATION / NO GAME SERVERS</span><span>原创示范关卡 · 玩家导入的素材仅留在本地浏览器</span><span>按 <kbd>P</kbd> 暂停 <span class="slash">/</span> <kbd>R</kbd> 重开</span></footer>
+  </main>
+  <script src="js/levels.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
