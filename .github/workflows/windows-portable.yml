@@ -1,0 +1,85 @@
+name: windows-portable-offline-game
+on:
+  push:
+    paths:
+      - 'offline_game/**'
+      - '.github/workflows/windows-portable.yml'
+  workflow_dispatch:
+
+jobs:
+  windows-offline-game:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch real pinned open-source JRPG files
+        shell: pwsh
+        run: |
+          git submodule update --init -- third_party/godot-demo-projects
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot fetch official JRPG source' }
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build independent offline JRPG project
+        shell: pwsh
+        run: |
+          python offline_game/tools/build_game.py --force
+          if ($LASTEXITCODE -ne 0) { throw 'Game build failed' }
+      - name: Download official self-contained Godot 4.7.2 Windows runtime
+        shell: pwsh
+        run: |
+          $url = 'https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_win64.exe.zip'
+          Invoke-WebRequest -Uri $url -OutFile "$env:RUNNER_TEMP\godot-win.zip"
+          Expand-Archive "$env:RUNNER_TEMP\godot-win.zip" -DestinationPath "$env:RUNNER_TEMP\godot-bin"
+          $engine = Get-ChildItem "$env:RUNNER_TEMP\godot-bin" -Filter 'Godot_v4.7.2-stable_win64.exe' -Recurse | Select-Object -First 1
+          if (-not $engine) { throw 'Official Godot Windows executable was not found' }
+          Copy-Item $engine.FullName "$env:RUNNER_TEMP\GodotGame.exe"
+      - name: Import and start the actual game headlessly on Windows
+        shell: pwsh
+        run: |
+          & "$env:RUNNER_TEMP\GodotGame.exe" --headless --path offline_game/build/solo_jrpg --editor --import --quit 2>&1 | Tee-Object -FilePath godot-windows-import.log
+          if ($LASTEXITCODE -ne 0) { throw 'Godot Windows import failed' }
+          & "$env:RUNNER_TEMP\GodotGame.exe" --headless --path offline_game/build/solo_jrpg --quit-after 120 2>&1 | Tee-Object -FilePath godot-windows-run.log
+          if ($LASTEXITCODE -ne 0) { throw 'Godot Windows start failed' }
+          if (Select-String -Path godot-windows-import.log,godot-windows-run.log -Pattern 'SCRIPT ERROR|Parse Error|ERROR:.*Parser Error') { throw 'Godot parse/runtime errors found' }
+      - name: Build portable Windows game with no engine install required
+        shell: pwsh
+        run: |
+          $dest = 'dist/OfflineJRPG'
+          New-Item -ItemType Directory -Path "$dest/game" -Force | Out-Null
+          Copy-Item 'offline_game/build/solo_jrpg/*' "$dest/game" -Recurse -Force
+          Copy-Item "$env:RUNNER_TEMP\GodotGame.exe" "$dest/GodotGame.exe"
+          $launch = @'
+          @echo off
+          cd /d "%~dp0"
+          start "" "%~dp0GodotGame.exe" --path "%~dp0game"
+          '@
+          Set-Content -Path "$dest/PLAY.cmd" -Value $launch -Encoding ascii
+          $readme = @'
+          Offline JRPG Windows portable edition (open-source Godot example)
+          1. Extract this entire ZIP, keeping the game folder and GodotGame.exe.
+          2. Double-click PLAY.cmd. No internet, account or Godot installation is required.
+          3. F5 save, F9 load, Escape pause. Saved game remains on your local computer.
+          This is NOT a repaired APK or a replica of a discontinued commercial game.
+          Source: https://github.com/godotengine/godot-demo-projects
+          Godot Engine official release: https://github.com/godotengine/godot/releases/tag/4.7.2-stable
+          '@
+          Set-Content -Path "$dest/READ_ME_FIRST.txt" -Value $readme -Encoding utf8
+          Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/godotengine/godot/4.7.2-stable/LICENSE.txt' -OutFile "$dest/GODOT_ENGINE_LICENSE.txt"
+          if (-not (Test-Path "$dest/game/game.tscn")) { throw 'Packaged game main scene missing' }
+          if (-not (Test-Path "$dest/game/UPSTREAM_LICENSE.md")) { throw 'Upstream attribution missing' }
+      - name: Publish complete ready-to-launch Windows game
+        uses: actions/upload-artifact@v4
+        with:
+          name: OfflineJRPG-Windows-Portable
+          path: dist/OfflineJRPG/
+          retention-days: 14
+      - name: Preserve Windows engine run logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: OfflineJRPG-Windows-Validation
+          path: |
+            godot-windows-import.log
+            godot-windows-run.log
+          if-no-files-found: ignore
+          retention-days: 14
