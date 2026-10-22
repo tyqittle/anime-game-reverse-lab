@@ -1,0 +1,32 @@
+name: upstream-source-check
+on:
+  push:
+    paths:
+      - '.gitmodules'
+      - 'third_party/**'
+      - 'pyproject.toml'
+      - 'src/erlab/unity_assets.py'
+      - 'tests/test_unity_assets.py'
+      - '.github/workflows/upstream-check.yml'
+  workflow_dispatch:
+jobs:
+  verify-real-upstreams:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pinned real UnityPy source and a real Godot game
+        run: |
+          git submodule update --init --depth 1 -- third_party/UnityPy third_party/godot-demo-projects
+          test -f third_party/UnityPy/UnityPy/__init__.py
+          test -f third_party/godot-demo-projects/2d/platformer/project.godot
+          git submodule status
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install published UnityPy package
+        run: python -m pip install -e '.[unity]'
+      - name: Test actual external dependency and adapter
+        run: |
+          python -c 'import UnityPy; print("Using real UnityPy", UnityPy.__version__)'
+          erlab-unity --help
+          python -m unittest discover -s tests -v

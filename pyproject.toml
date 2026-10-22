@@ -4,16 +4,20 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "anime-game-reverse-lab"
-version = "0.1.0"
-description = "Safe, offline asset-format research toolkit for anime games"
+version = "0.3.0"
+description = "Reverse-game research workspace with pinned upstream projects and UnityPy integration"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{name = "Anime Game Reverse Lab contributors"}]
 dependencies = []
 
+[project.optional-dependencies]
+unity = ["UnityPy==1.25.4"]
+
 [project.scripts]
 erlab = "erlab.cli:main"
+erlab-unity = "erlab.unity_assets:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

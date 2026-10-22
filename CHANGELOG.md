@@ -1,15 +1,13 @@
 # Changelog
 
-## 0.2.0 (2026-10-23)
+## v0.3.0 — 2026-10-23
+- Four pinned Git submodules for real upstream source: UnityPy, Grasscutter, LunarCore and Godot demos.
+- Added a UnityPy-based inspection/export adapter and Windows/Unix source setup scripts.
+- Explicitly retained each upstream license; prior custom web demo demoted to historical sandbox.
+- Added offline unit tests and an Actions workflow for fetching actual upstream source.
 
-- 新增完全离线、可直接双击运行的原创 2D 横版动作演示《星烬计划》。
-- 独立可替换的关卡、战斗/物理引擎、合成音效、响应式 HUD、键盘/触屏操作。
-- 二段跳、连续近战、闪避、飞刃、敌人AI、Boss、伤害/收集、胜负流程。
-- 只读导入本机 PNG / WebP 角色图，不上传素材。
-- 整理公开开源参考、许可证与素材用途；保持原有 Python 资源研究工具不变。
+## v0.2.0
+- Added independently written browser game prototype (not game reverse engineering).
 
-## 0.1.0 (2026-10-23)
-
-- 初始化多二游逆向研究工程与规范。
-- 实现文件格式检测、离线清单、摘要与版本差异。
-- 建立游戏统一档案、Windows 一键扫描和 CI 测试。
+## v0.1.0
+- Added local inventory/format/diff utilities.
