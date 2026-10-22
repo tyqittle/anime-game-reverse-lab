@@ -15,12 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fetch pinned original Godot JRPG project
+      - name: Fetch pinned official Godot JRPG source
         run: git submodule update --init -- third_party/godot-demo-projects
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Construct real upstream JRPG and offline save addon
+      - name: Construct genuine JRPG with offline save module
         run: |
           python offline_game/tools/build_game.py --force
           test -f offline_game/build/solo_jrpg/game.tscn
@@ -28,11 +28,38 @@ jobs:
           test -f offline_game/build/solo_jrpg/combat/combat.tscn
           test -f offline_game/build/solo_jrpg/addons/offline_mode/offline_manager.gd
           test -f offline_game/build/solo_jrpg/UPSTREAM_LICENSE.md
-      - name: Run Python unit tests
+      - name: Run Python offline builder and APK auditing unit tests
         run: PYTHONPATH=src python -m unittest discover -s tests -v
-      - name: Upload editable Godot game source (not EXE)
+      - name: Download pinned official Godot 4.7.2 stable Linux editor
+        run: |
+          curl --fail --location --retry 3 --output /tmp/godot.zip https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          chmod +x /tmp/godot-bin/Godot_v4.7.2-stable_linux.x86_64
+          /tmp/godot-bin/Godot_v4.7.2-stable_linux.x86_64 --version
+      - name: Import and GDScript-parse actual Godot game
+        run: |
+          set -o pipefail
+          /tmp/godot-bin/Godot_v4.7.2-stable_linux.x86_64 --headless --path offline_game/build/solo_jrpg --editor --import --quit 2>&1 | tee /tmp/godot-import.log
+          if grep -E "SCRIPT ERROR|Parse Error|ERROR:.*Parser Error" /tmp/godot-import.log; then exit 1; fi
+      - name: Launch actual game scene headlessly for 120 frames
+        run: |
+          set -o pipefail
+          /tmp/godot-bin/Godot_v4.7.2-stable_linux.x86_64 --headless --path offline_game/build/solo_jrpg --quit-after 120 2>&1 | tee /tmp/godot-run.log
+          if grep -E "SCRIPT ERROR|Parse Error|ERROR:.*Parser Error" /tmp/godot-run.log; then exit 1; fi
+      - name: Upload complete editable JRPG source
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: OfflineJRPG-Godot-Source
           path: offline_game/build/solo_jrpg/
+          retention-days: 14
+      - name: Upload engine validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: OfflineJRPG-Validation
+          path: |
+            /tmp/godot-import.log
+            /tmp/godot-run.log
+          if-no-files-found: ignore
           retention-days: 14
