@@ -2,9 +2,13 @@
 
 本工程以 [Godot Foundation / godot-demo-projects/2d/role_playing_game](https://github.com/godotengine/godot-demo-projects/tree/master/2d/role_playing_game) 作为**游戏本体**：地图、人物、NPC 对话、回合制战斗、动画及美术均来自真实上游，而非本项目重新创造的演示小游戏。固定上游 commit：`b761b4cd5718a7118f2c95eb55f181d0a5f004f1`，MIT；其他资产声明遵守上游原许可。
 
-## Windows 快速启动
+## Windows 便携版（无需安装引擎）
 
-电脑需安装 Git、Python 3.10+ 和**能打开固定上游项目的 Godot（项目的配置声明 Godot 4.7 开发版本）**。Windows 双击 `scripts/run-offline.cmd`，或者：
+[下载已通过 Windows 无界面启动验收的完整单机包](https://github.com/tyqittle/anime-game-reverse-lab/actions/runs/39825937702)：打开 Actions 运行页面底部的 Artifacts，下载 `OfflineJRPG-Windows-Portable`，解压后双击 `PLAY.cmd`。已经将官方 Godot 4.7.2 稳定版运行程序、完整开源游戏及授权说明一起打包；无需额外安装 Godot 或联网登录。
+
+## 源码构建 / 再开发
+
+电脑需安装 Git、Python 3.10+ 和**Godot 4.7.2 稳定版**。Windows 双击 `scripts/run-offline.cmd`，或者：
 
 ```powershell
 git clone https://github.com/tyqittle/anime-game-reverse-lab.git
@@ -26,4 +30,4 @@ powershell -ExecutionPolicy Bypass -File scripts/run-offline.ps1
 
 ## 目前无法做的事
 
-尚未给出要复活的“已停服手游”的名称或 APK。当前交付的游戏是**开源 RPG 的单机扩展**，不是商业 APK 的修改版，无法声称实现原游戏登录、关卡、联网协议或专有素材。此轮工具测试不等于对 Godot GUI/Windows EXE/Android APK 的完整实际验收。详见 [阶段 0 可行性报告](../docs/PHASE_0_FEASIBILITY.md)。
+尚未给出要复活的“已停服手游”的名称或 APK。当前交付的游戏是**开源 RPG 的单机扩展**，不是商业 APK 的修改版，无法声称实现原游戏登录、关卡、联网协议或专有素材。当前 Linux、Windows CI 已用真实 Godot 4.7.2 正式版导入工程并无界面启动主场景 120 帧通过；但尚未进行真实桌面交互、完整战斗与存档恢复验收，也未导出 Android APK。详见 [阶段 0 可行性报告](../docs/PHASE_0_FEASIBILITY.md)。
