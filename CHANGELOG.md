@@ -11,3 +11,8 @@
 
 ## v0.1.0
 - Added local inventory/format/diff utilities.
+
+## v0.4.0 — 2026-10-23
+- Added real upstream Godot JRPG offline game builder, local save/backup, pause menu, cross-platform launchers, and CI package artifact.
+- Added conservative, read-only APK phase-0 analysis CLI and unit tests.
+- Explicitly distinguish open-source JRPG demo from an unprovided discontinued commercial game APK.

@@ -1,0 +1,38 @@
+name: offline-game
+on:
+  push:
+    paths:
+      - 'offline_game/**'
+      - 'src/erlab/apk_audit.py'
+      - 'tests/test_apk_audit.py'
+      - 'tests/test_offline_game.py'
+      - 'scripts/run-offline.*'
+      - '.github/workflows/offline-game.yml'
+  pull_request:
+  workflow_dispatch:
+jobs:
+  package-existing-open-source-game:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pinned original Godot JRPG project
+        run: git submodule update --init -- third_party/godot-demo-projects
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Construct real upstream JRPG and offline save addon
+        run: |
+          python offline_game/tools/build_game.py --force
+          test -f offline_game/build/solo_jrpg/game.tscn
+          test -f offline_game/build/solo_jrpg/grid_movement/exploration.tscn
+          test -f offline_game/build/solo_jrpg/combat/combat.tscn
+          test -f offline_game/build/solo_jrpg/addons/offline_mode/offline_manager.gd
+          test -f offline_game/build/solo_jrpg/UPSTREAM_LICENSE.md
+      - name: Run Python unit tests
+        run: PYTHONPATH=src python -m unittest discover -s tests -v
+      - name: Upload editable Godot game source (not EXE)
+        uses: actions/upload-artifact@v4
+        with:
+          name: OfflineJRPG-Godot-Source
+          path: offline_game/build/solo_jrpg/
+          retention-days: 14
