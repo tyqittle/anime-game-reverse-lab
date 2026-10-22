@@ -1,0 +1,23 @@
+{
+  "id": "honkai-star-rail",
+  "name": "崩坏：星穹铁道",
+  "status": "upstream-sourced-research-only",
+  "sample_versions": [],
+  "engine": null,
+  "container_formats": [],
+  "research_topics": [
+    "已有开源服务端重实现结构",
+    "配置及数据模型",
+    "资源清单研究"
+  ],
+  "sources": [
+    {
+      "kind": "upstream-source-code",
+      "repo": "Melledy/LunarCore",
+      "path": "third_party/LunarCore",
+      "license": "AGPL-3.0",
+      "note": "仅作为独立的上游源码参考，不表示游戏客户端已经逆向重建"
+    }
+  ],
+  "notes": "notes.md"
+}
