@@ -11,7 +11,9 @@
 
 ## Windows 操作
 
-需要 Git、Python 3.10+ 与 Godot 4.7+。也可以直接在本仓库 Actions 的 `arknights-pc-windows` 下载构建好的便携包（若该运行通过）。
+**直接玩：** 在 GitHub Actions 的 `arknights-pc-windows-portable` 工作流下载 `Arknights-PC-Offline-Prototype-Windows`，完整解压后双击 `PLAY.cmd`。便携包自带 Godot，不需要安装 Godot/Python/Git。首次运行会尝试从你的立绘仓库下载 3 张立绘到本机，成功后离线运行，且不再重复下载；网络不可用时能用开源工程原有美术先玩。把自己持有的透明 Q 版图片命名为 `slot_0.png`、`slot_1.png`、`slot_2.png` 放进 `game/arknights/assets/chibi/`，再次运行后自动绑定。**注意当前尚不包含由 Spine 骨骼导出的真实战斗 Q 版动画。**
+
+**源码再开发：** 需要 Git、Python 3.10+ 与 Godot 4.7+。
 
 ```powershell
 git clone https://github.com/tyqittle/anime-game-reverse-lab.git

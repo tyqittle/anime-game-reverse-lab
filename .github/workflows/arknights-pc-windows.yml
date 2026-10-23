@@ -52,6 +52,7 @@ jobs:
           $cmd = @'
           @echo off
           cd /d "%~dp0"
+          powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0SyncPortraits.ps1"
           start "" "%~dp0ArknightsLab.exe" --path "%~dp0game"
           '@
           Set-Content -Path "$root/PLAY.cmd" -Value $cmd -Encoding ascii
@@ -59,7 +60,7 @@ jobs:
           Arknights-inspired PC Offline Tactical Lab - PROTOTYPE (not official Arknights).
           1. Unzip the entire archive. Double click PLAY.cmd.
           2. The sample map, enemies, turrets, projectiles, waves and HUD are from Quiver Outpost Assault (MIT).
-          3. Default bundle has no Arknights copyrighted portraits or chibi. See arknights_pc/README.md in the source repository to import your own art locally.
+          3. The first PLAY downloads 3 portraits from your tyqittle gallery into the local game directory (once; cached). Internet is optional: missing images fall back to upstream art. To import your own Q PNG, copy slot_0.png, slot_1.png, slot_2.png to game/arknights/assets/chibi/ and relaunch. No copyrighted assets are bundled by GitHub Actions.
           4. Click start in the launcher, place units on turret slots, defend waves, then win to save progress.
           5. This is not a recreation of the official Arknights client or official stages.
           Upstream source: https://github.com/quiver-dev/tower-defense-godot4
