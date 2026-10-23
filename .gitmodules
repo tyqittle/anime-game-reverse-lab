@@ -19,3 +19,6 @@
 [submodule "third_party/Arknights-AssetStudioMod"]
     path = third_party/Arknights-AssetStudioMod
     url = https://github.com/aelurum/AssetStudioMod.git
+[submodule "third_party/arknights-td-godot"]
+    path = third_party/arknights-td-godot
+    url = https://github.com/quiver-dev/tower-defense-godot4.git

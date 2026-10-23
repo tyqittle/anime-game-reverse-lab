@@ -1,0 +1,59 @@
+name: arknights-pc-godot
+on:
+  push:
+    paths:
+      - 'arknights_pc/**'
+      - 'scripts/run-arknights-pc.*'
+      - '.gitmodules'
+      - 'third_party/arknights-td-godot'
+      - 'tests/test_arknights_pc.py'
+      - '.github/workflows/arknights-pc.yml'
+  workflow_dispatch:
+jobs:
+  godot-actual-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch and verify REAL MIT tower defense source
+        run: |
+          git submodule update --init -- third_party/arknights-td-godot
+          test -f third_party/arknights-td-godot/project.godot
+          test -f third_party/arknights-td-godot/entities/enemies/enemy.gd
+          test -f third_party/arknights-td-godot/entities/turrets/turret.gd
+          test -f third_party/arknights-td-godot/scenes/maps/map_template.tscn
+      - name: Test builder and local art binding without copyrighted assets
+        run: |
+          python -m unittest discover -s tests -p 'test_arknights_pc.py' -v
+          python arknights_pc/tools/build.py --force
+          test -f arknights_pc/build/arknights_td/scenes/maps/map_template.tscn
+          test -f arknights_pc/build/arknights_td/arknights/launcher.tscn
+          test -f arknights_pc/build/arknights_td/UPSTREAM_LICENSE.txt
+      - name: Download official Godot editor
+        run: |
+          curl -fL --retry 3 https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip -o /tmp/godot.zip
+          mkdir -p /tmp/godot-bin
+          unzip -q /tmp/godot.zip -d /tmp/godot-bin
+          chmod +x /tmp/godot-bin/Godot_v4.7.2-stable_linux.x86_64
+      - name: Import actual Godot game and check parsers
+        run: |
+          set -o pipefail
+          /tmp/godot-bin/Godot_v4.7.2-stable_linux.x86_64 --headless --path arknights_pc/build/arknights_td --editor --import --quit 2>&1 | tee /tmp/ark-godot-import.log
+          if grep -E 'SCRIPT ERROR|Parse Error|ERROR:.*Parser Error' /tmp/ark-godot-import.log; then exit 1; fi
+      - name: Actually launch and step 120 frames
+        run: |
+          set -o pipefail
+          /tmp/godot-bin/Godot_v4.7.2-stable_linux.x86_64 --headless --path arknights_pc/build/arknights_td --quit-after 120 2>&1 | tee /tmp/ark-godot-run.log
+          if grep -E 'SCRIPT ERROR|Parse Error|ERROR:.*Parser Error' /tmp/ark-godot-run.log; then exit 1; fi
+      - name: Upload editable Godot game and validation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Arknights-PC-Godot-Source
+          path: |
+            arknights_pc/build/arknights_td/
+            /tmp/ark-godot-import.log
+            /tmp/ark-godot-run.log
+          retention-days: 14
