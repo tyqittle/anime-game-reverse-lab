@@ -3,7 +3,8 @@ param(
     [string]$Godot = "godot",
     [string]$Archive = "",
     [string]$Chibi = "",
-    [switch]$BuildOnly
+    [switch]$BuildOnly,
+    [switch]$SkipPortraitDownload
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -16,6 +17,7 @@ if ($LASTEXITCODE -ne 0) { throw "Upstream checkout failed" }
 $cmdArgs = @("arknights_pc/tools/build.py", "--force")
 if ($Archive -ne "") { $cmdArgs += @("--archive", $Archive) }
 if ($Chibi -ne "") { $cmdArgs += @("--chibi", $Chibi) }
+if ($Archive -eq "" -and !$SkipPortraitDownload) { $cmdArgs += "--fetch-gallery-art" }
 Write-Host "[2/3] Assembling playable local Godot project and optional portraits/chibi..."
 & python @cmdArgs
 if ($LASTEXITCODE -ne 0) { throw "Game builder failed" }

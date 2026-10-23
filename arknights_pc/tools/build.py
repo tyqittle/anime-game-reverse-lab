@@ -73,6 +73,45 @@ def _candidate_image(archive: Path, obj: dict) -> Path | None:
     return None
 
 
+
+# Three portraits known to exist in the user's published archive. Artwork is
+# fetched to the USER'S LOCAL BUILD ONLY, never committed or shipped via CI.
+PUBLIC_GALLERY = "https://raw.githubusercontent.com/tyqittle/anime-character-archive/main/assets/portraits/"
+STARTER_PORTRAITS = (
+    ("芬", "ak-char_123_fang-1.webp"),
+    ("能天使", "ak-char_103_angel-1.webp"),
+    ("阿米娅", "ak-char_002_amiya-1.webp"),
+)
+
+
+def fetch_public_gallery_art(dest: Path, manifest: dict) -> int:
+    """Optional install-time download of three user-archive portraits, not runtime CDN dependency."""
+    import urllib.request
+    copied = 0
+    folder = dest / "arknights/assets/portraits"
+    folder.mkdir(parents=True, exist_ok=True)
+    for i, (name, filename) in enumerate(STARTER_PORTRAITS):
+        target = folder / f"slot_{i}.webp"
+        try:
+            request = urllib.request.Request(PUBLIC_GALLERY + filename,
+                                             headers={"User-Agent": "ArknightsLocalLab/0.1"})
+            with urllib.request.urlopen(request, timeout=20) as response:
+                data = response.read(8 * 1024 * 1024 + 1)
+            if len(data) > 8 * 1024 * 1024 or not (data[:4] == b"RIFF" and data[8:12] == b"WEBP"):
+                raise ValueError(f"Not a bounded WebP image: {filename}")
+            target.write_bytes(data)
+            entry = manifest["slots"][i]
+            entry["name"] = name
+            entry["portrait"] = f"res://arknights/assets/portraits/slot_{i}.webp"
+            entry["source"] = f"tyqittle/anime-character-archive:{filename}"
+            copied += 1
+        except (OSError, ValueError) as exc:
+            print(f"Warning: portrait unavailable ({filename}): {exc}", file=sys.stderr)
+    (dest / "arknights/assets/manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return copied
+
+
 def import_art(dest: Path, archive: Path | None, chibi: Path | None) -> dict:
     art_root = dest / "arknights" / "assets"
     (art_root / "portraits").mkdir(parents=True, exist_ok=True)
@@ -126,7 +165,8 @@ def _ignore(_directory: str, names: list[str]) -> set[str]:
     return {n for n in names if n in {".git", ".godot", ".DS_Store"}}
 
 
-def build(root: Path, archive: Path | None = None, chibi: Path | None = None, force: bool = False) -> dict:
+def build(root: Path, archive: Path | None = None, chibi: Path | None = None,
+          force: bool = False, fetch_gallery: bool = False) -> dict:
     root = root.resolve()
     src = root / UPSTREAM
     overlay = root / OVERLAY
@@ -154,6 +194,8 @@ def build(root: Path, archive: Path | None = None, chibi: Path | None = None, fo
         cfg = cfg.replace("[autoload]", '[autoload]\nAKBridge="*res://arknights/bridge.gd"')
         (tmp / "project.godot").write_text(cfg, encoding="utf-8")
         art = import_art(tmp, archive, chibi)
+        if fetch_gallery and archive is None:
+            fetch_public_gallery_art(tmp, art)
         license_path = src / "LICENSE.txt"
         shutil.copy2(license_path, tmp / "UPSTREAM_LICENSE.txt")
         if (src / "LICENSE_ASSETS.txt").is_file():
@@ -182,9 +224,10 @@ def main(argv=None) -> int:
     p.add_argument("--archive", type=Path, help="local checkout of tyqittle/anime-character-archive")
     p.add_argument("--chibi", type=Path, help="local directory containing slot_0.png, slot_1.png and slot_2.png")
     p.add_argument("--force", action="store_true")
+    p.add_argument("--fetch-gallery-art", action="store_true", help="Download three curated images only into local build; never into Git")
     a = p.parse_args(argv)
     try:
-        print(json.dumps(build(a.root, a.archive, a.chibi, a.force), ensure_ascii=False, indent=2))
+        print(json.dumps(build(a.root, a.archive, a.chibi, a.force, a.fetch_gallery_art), ensure_ascii=False, indent=2))
         return 0
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         print(f"Build failed: {exc}", file=sys.stderr)

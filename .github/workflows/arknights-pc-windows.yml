@@ -1,0 +1,87 @@
+name: arknights-pc-windows-portable
+on:
+  push:
+    paths:
+      - 'arknights_pc/**'
+      - 'scripts/run-arknights-pc.*'
+      - '.github/workflows/arknights-pc-windows.yml'
+      - '.gitmodules'
+      - 'third_party/arknights-td-godot'
+  workflow_dispatch:
+jobs:
+  build-playable-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Checkout real original MIT Godot tower defense source
+        shell: pwsh
+        run: |
+          git submodule update --init -- third_party/arknights-td-godot
+          if ($LASTEXITCODE -ne 0) { throw 'Upstream checkout failed' }
+      - name: Build offline PC game from original gameplay and local overlay
+        shell: pwsh
+        run: |
+          python arknights_pc/tools/build.py --force
+          if ($LASTEXITCODE -ne 0) { throw 'Game build failed' }
+      - name: Download self-contained Godot 4.7.2 Windows executable
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri 'https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_win64.exe.zip' -OutFile "$env:RUNNER_TEMP\godot-win.zip"
+          Expand-Archive "$env:RUNNER_TEMP\godot-win.zip" -DestinationPath "$env:RUNNER_TEMP\godot-bin"
+          $engine = Get-ChildItem "$env:RUNNER_TEMP\godot-bin" -Recurse -Filter 'Godot_v4.7.2-stable_win64.exe' | Select-Object -First 1
+          if (-not $engine) { throw 'Godot binary not found' }
+          Copy-Item $engine.FullName "$env:RUNNER_TEMP\ArknightsLab.exe"
+      - name: Actually launch Windows game headlessly
+        shell: pwsh
+        run: |
+          & "$env:RUNNER_TEMP\ArknightsLab.exe" --headless --path arknights_pc/build/arknights_td --editor --import --quit 2>&1 | Tee-Object -FilePath ark-windows-import.log
+          if ($LASTEXITCODE -ne 0) { throw 'Godot import failed' }
+          & "$env:RUNNER_TEMP\ArknightsLab.exe" --headless --path arknights_pc/build/arknights_td --quit-after 120 2>&1 | Tee-Object -FilePath ark-windows-run.log
+          if ($LASTEXITCODE -ne 0) { throw 'Godot run failed' }
+          if (Select-String -Path ark-windows-import.log,ark-windows-run.log -Pattern 'SCRIPT ERROR|Parse Error|ERROR:.*Parser Error') { throw 'Godot script errors' }
+      - name: Package standalone portable demo with upstream attribution
+        shell: pwsh
+        run: |
+          $root = 'dist/Arknights-PC-Offline-Prototype'
+          New-Item -ItemType Directory -Path "$root/game" -Force | Out-Null
+          Copy-Item 'arknights_pc/build/arknights_td/*' "$root/game" -Recurse -Force
+          Copy-Item "$env:RUNNER_TEMP\ArknightsLab.exe" "$root/ArknightsLab.exe"
+          $cmd = @'
+          @echo off
+          cd /d "%~dp0"
+          start "" "%~dp0ArknightsLab.exe" --path "%~dp0game"
+          '@
+          Set-Content -Path "$root/PLAY.cmd" -Value $cmd -Encoding ascii
+          $doc = @'
+          Arknights-inspired PC Offline Tactical Lab - PROTOTYPE (not official Arknights).
+          1. Unzip the entire archive. Double click PLAY.cmd.
+          2. The sample map, enemies, turrets, projectiles, waves and HUD are from Quiver Outpost Assault (MIT).
+          3. Default bundle has no Arknights copyrighted portraits or chibi. See arknights_pc/README.md in the source repository to import your own art locally.
+          4. Click start in the launcher, place units on turret slots, defend waves, then win to save progress.
+          5. This is not a recreation of the official Arknights client or official stages.
+          Upstream source: https://github.com/quiver-dev/tower-defense-godot4
+          '@
+          Set-Content -Path "$root/READ_ME_FIRST.txt" -Value $doc -Encoding UTF8
+          if (!(Test-Path "$root/game/UPSTREAM_LICENSE.txt")) { throw 'Missing required Quiver MIT license' }
+          if (!(Test-Path "$root/game/UPSTREAM_ASSETS_LICENSE.txt")) { throw 'Missing asset attribution' }
+          if (!(Test-Path "$root/game/arknights/launcher.tscn")) { throw 'Missing launcher scene' }
+          if (!(Test-Path "$root/game/scenes/maps/map_template.tscn")) { throw 'Missing actual upstream battlefield' }
+      - name: Publish complete Windows game, not empty demonstration shell
+        uses: actions/upload-artifact@v4
+        with:
+          name: Arknights-PC-Offline-Prototype-Windows
+          path: dist/Arknights-PC-Offline-Prototype/
+          retention-days: 14
+      - name: Upload Windows test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Arknights-PC-Windows-Validation
+          path: |
+            ark-windows-import.log
+            ark-windows-run.log
+          if-no-files-found: ignore
+          retention-days: 14

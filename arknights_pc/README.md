@@ -19,7 +19,7 @@ cd anime-game-reverse-lab
 .\scripts\run-arknights-pc.cmd
 ```
 
-**使用你现有的立绘档案馆：**
+**默认从你的立绘仓库自动下载三张角色立绘到本机**：芬（先锋）、能天使（狙击）、阿米娅（术师）。只在本机第一次构建时下载，运行游戏无需联网。离线构建可传 `-SkipPortraitDownload`；GitHub Actions 构建不包含这些版权图片。也支持传入你现有的完整立绘档案馆：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/run-arknights-pc.ps1 -Archive "D:\anime-character-archive" -Chibi "D:\my-arknights-q"
@@ -39,4 +39,4 @@ powershell -ExecutionPolicy Bypass -File scripts/run-arknights-pc.ps1 -Archive "
 
 ## 来源与版权
 
-Quiver 项目代码/资产应保留原项目 `LICENSE.txt` 和 `LICENSE_ASSETS.txt`。个人本地导入的明日方舟立绘与战斗 Q 素材，版权不属于 Quiver 或本仓库的 MIT 许可。不要把生成的包含商业游戏素材的构建物上传到 GitHub、公开发行或销售。游戏离线运行，不连接官方账户/服务。
+Quiver 的**代码是 MIT**，其随项目的**美术、音乐、音效另为 CC BY 4.0**。构建保留 `UPSTREAM_LICENSE.txt` 与 `UPSTREAM_ASSETS_LICENSE.txt` 并注明来源。个人本地导入的明日方舟立绘与战斗 Q 素材，版权不属于 Quiver 或本仓库的 MIT 许可。不要把生成的包含商业游戏素材的构建物上传到 GitHub、公开发行或销售。游戏离线运行，不连接官方账户/服务。
