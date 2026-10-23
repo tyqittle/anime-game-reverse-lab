@@ -10,3 +10,12 @@
 [submodule "third_party/godot-demo-projects"]
     path = third_party/godot-demo-projects
     url = https://github.com/godotengine/godot-demo-projects.git
+[submodule "third_party/Arknights-Stronghold-Protocol"]
+    path = third_party/Arknights-Stronghold-Protocol
+    url = https://github.com/sganggs/Stronghold-Protocol.git
+[submodule "third_party/Arknights-Darknights-server"]
+    path = third_party/Arknights-Darknights-server
+    url = https://github.com/LewisGet/__Darknights-server.git
+[submodule "third_party/Arknights-AssetStudioMod"]
+    path = third_party/Arknights-AssetStudioMod
+    url = https://github.com/aelurum/AssetStudioMod.git

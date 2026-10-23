@@ -1,43 +1,41 @@
-# 二游逆向研究与离线单机游戏
+# 明日方舟 Windows 离线研究（目标是原版，不是教程 Demo）
 
-**可下载的 Windows 离线单机游戏：** [一键获取便携版（PLAY.cmd 启动）](https://github.com/tyqittle/anime-game-reverse-lab/actions/runs/39825937702)；进入 Actions 页面底部 Artifacts，下载 `OfflineJRPG-Windows-Portable`，解压后双击 `PLAY.cmd` 即可，无需单独安装 Godot。
+**当前状态：阶段 0 / 开源项目已接入 / 缺少用户本人的 APK 或 PC 客户端样本 / 原版单机化尚未实现。** 请先看 [明日方舟阶段 0 实证可行性报告](docs/ARKNIGHTS_PHASE_0.md)。
 
-**源码构建版本：** 基于官方现成 MIT 开源 Godot JRPG 做成可编辑的离线单机工程，不再把自制浏览器原型当作商业二游逆向成果。原开源游戏含地图探索、NPC 对话、回合制战斗及艺术资源；新增本机存档、自动存档、暂停菜单。
+2026-10-23 已将真实的开源工程作为固定提交的 Git 子模块接入：
+- **[Stronghold Protocol](third_party/Arknights-Stronghold-Protocol)**：可玩《明日方舟》衍生「卫戍协议」单人塔防，GPL-3.0-or-later；**不是原版主线**。
+- **[Darknights-server](third_party/Arknights-Darknights-server)**：原版客户端历史服务端模拟项目，Apache-2.0，**不保证支持当前客户端**。
+- **[AssetStudioMod](third_party/Arknights-AssetStudioMod)**：Unity 资源研究工具，MIT。
 
-**[单机游戏运行说明](offline_game/README.md)** · **[阶段 0 真实可行性报告](docs/PHASE_0_FEASIBILITY.md)** · **[工程验收说明](docs/SINGLE_PLAYER_DELIVERY.md)**
+它们是原仓库的真实代码，不是我新写的虚构游戏。以前的 `offline_game/` Godot JRPG 与《明日方舟》**没有关系，仍留在历史目录但不作为本项目的成品**。
 
-## Windows 开始运行
+## Windows：先运行真正的现成塔防（只是「卫戍协议」）
 
-电脑预先安装 **Git、Python 3.10+ 与Godot 4.7.2 正式版**。克隆仓库后双击 `scripts/run-offline.cmd`，或者：
+安装 Git 和 Node.js ≥22，克隆仓库后：
 
 ```powershell
 git clone https://github.com/tyqittle/anime-game-reverse-lab.git
 cd anime-game-reverse-lab
-powershell -ExecutionPolicy Bypass -File scripts/run-offline.ps1
+.\scripts\start-arknights-solo.cmd
 ```
 
-脚本自动拉取已固定的 [Godot 官方 JRPG 原游戏源代码](https://github.com/godotengine/godot-demo-projects/tree/master/2d/role_playing_game)，构建 `offline_game/build/solo_jrpg/project.godot`，然后调用 Godot 启动。**需要 Godot，不是双击 HTML 或现成 EXE。** 游戏 F5 存、F9 读、Esc 暂停；本地 JSON 位于 `user://offline_game/slot1.json`，不需要在线账号。
+脚本会拉取已固定版本的上游源码、安装依赖并尝试在本机 `http://127.0.0.1:3000` 启动。默认不下载版权美术/音频，可能缺少模型与音效。如果用户有权自行取得并选择下载上游素材：
 
-**GitHub Actions** 已通过 Linux 与 Windows 的真实 Godot 引擎导入和 120 帧无界面运行测试。`windows-portable-offline-game` 工作流输出**自带官方 Godot 引擎可执行程序**的 Windows 便携版；`offline-game` 工作流另提供可编辑的 `OfflineJRPG-Godot-Source` Godot 工程。Windows 便携版是引擎运行器 + 原始开源 RPG 游戏文件，不是修改后的商业手游 APK。
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start-arknights-solo.ps1 -AllowAssetDownloads
+```
 
-## 已真正复用的公开源码
+这可能让上游执行数百 MB 的素材下载，软件代码 GPL **不代表游戏版权素材有再分发许可**。主仓库不上传它们。
 
-| 项目 | 实际用途 | 许可证 |
-| --- | --- | --- |
-| [Godot Demo Projects / Role Playing Game](https://github.com/godotengine/godot-demo-projects) | 单机游戏本体、地图、角色、对话、战斗、美术 | MIT（注意原素材许可说明） |
-| [UnityPy](https://github.com/K0lb3/UnityPy) | Unity 文件结构与有权使用的资源导出 | MIT |
-| [Grasscutter](https://github.com/Grasscutters/Grasscutter) | 原神相关已有服务端重实现源码研究，不是此次游戏后端 | AGPL-3.0 |
-| [LunarCore](https://github.com/Melledy/LunarCore) | 星穹铁道相关已有服务端重实现源码研究 | AGPL-3.0 |
-
-这四个真实仓库已作为固定版本 Git 子模块接入。此前 `web/` 自写的 Project Ember 仅保留历史，不用于离线单机工程。开源游戏的文件版本/许可证见 [上游集成清单](docs/UPSTREAM_INTEGRATION.md)。
-
-## 阶段 0：待获取真实停服手游客户端
+## Windows：原版客户端 APK 只读分析（需你有权使用的 APK）
 
 ```powershell
 python -m pip install -e .
-erlab-apk "C:\personal\game.apk" --out reports/phase0.json --markdown reports/phase0.md
+erlab-apk "C:\path\to\owned\arknights.apk" --out reports/arknights-phase0.json --markdown reports/arknights-phase0.md
 ```
 
-`erlab-apk` 对个人合法持有的 APK 作**只读**、无联网的文件清单/DEX 字符串检查，提取引擎、网络 SDK 和候选域名线索，不修改 APK，也不保证可离线运行。
+没有提供 APK，所以现在不能写出真实引擎/保护/域名报告，更不能宣称原版游戏已经无需服务器登录。后续所有修改只作用于复制件，支持差异追踪与撤销。
 
-用户提供的模板中 `{游戏名}` 和 `{APK路径}` 尚未替换，当前没有真实客户端，因此**不能声明已经成功逆向任何商业手游、完成登录、还原协议或导出 Android 单机包**。本仓库自有代码为 MIT，外部开源项目各保留其许可；不提交商用游戏资源、密钥或账号数据。
+## 许可证及边界
+
+主仓库自有代码 MIT；每个第三方子模块独立许可证，其中 Stronghold 为 GPL-3.0-or-later，第三方《明日方舟》美术、音频和游戏数据版权不包括在开源许可证内。不上传官方客户端、商业资源、专有密钥和账号；不运营对外私服。

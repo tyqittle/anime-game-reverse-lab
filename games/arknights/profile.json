@@ -1,0 +1,35 @@
+{
+  "id": "arknights",
+  "name": "明日方舟",
+  "target_platform": "Windows PC",
+  "source_platform": "Android / Windows PC",
+  "status": "stage-0-upstream-integrated-no-client-sample",
+  "target": "original tower-defense game, personal offline-only",
+  "source_client": {
+    "apk_received": false,
+    "pc_client_received": false,
+    "version": null,
+    "sha256": null
+  },
+  "upstreams": [
+    {
+      "repo": "sganggs/Stronghold-Protocol",
+      "path": "third_party/Arknights-Stronghold-Protocol",
+      "purpose": "playable derived Stronghold mode, not original game",
+      "code_license": "GPL-3.0-or-later"
+    },
+    {
+      "repo": "LewisGet/__Darknights-server",
+      "path": "third_party/Arknights-Darknights-server",
+      "purpose": "historic partial service emulator; no 2026 compatibility evidence",
+      "code_license": "Apache-2.0"
+    },
+    {
+      "repo": "aelurum/AssetStudioMod",
+      "path": "third_party/Arknights-AssetStudioMod",
+      "purpose": "Unity asset inspection",
+      "code_license": "MIT"
+    }
+  ],
+  "evaluation": "docs/ARKNIGHTS_PHASE_0.md"
+}

@@ -1,0 +1,48 @@
+name: arknights-pinned-upstream-validation
+on:
+  push:
+    paths:
+      - .gitmodules
+      - third_party/Arknights-Stronghold-Protocol
+      - third_party/Arknights-Darknights-server
+      - third_party/Arknights-AssetStudioMod
+      - docs/ARKNIGHTS_PHASE_0.md
+      - games/arknights/**
+      - scripts/start-arknights-solo.*
+      - .github/workflows/arknights-upstreams.yml
+  workflow_dispatch:
+jobs:
+  validate-existing-game-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch actual pinned upstream source
+        run: |
+          git submodule update --init --depth 1 -- third_party/Arknights-Stronghold-Protocol
+          test -f third_party/Arknights-Stronghold-Protocol/package.json
+          test -f third_party/Arknights-Stronghold-Protocol/server/index.js
+          test -f third_party/Arknights-Stronghold-Protocol/server/sim/rng.js
+          echo "Pinned upstream source is present"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install original project's dependencies
+        working-directory: third_party/Arknights-Stronghold-Protocol
+        run: npm ci --no-audit --no-fund
+      - name: Validate actual upstream game engine sources
+        working-directory: third_party/Arknights-Stronghold-Protocol
+        run: |
+          node --check server/index.js
+          node --check server/sim/rng.js
+          node --test test/content/bands.test.js
+      - name: Stage-0 report metadata checks
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('games/arknights/profile.json').read_text())
+          assert p['id']=='arknights'
+          assert not p['source_client']['apk_received']
+          assert Path('docs/ARKNIGHTS_PHASE_0.md').exists()
+          print('Stage-0 profile validated')
+          PY
